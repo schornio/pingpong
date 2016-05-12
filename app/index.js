@@ -1,7 +1,12 @@
 'use strict';
+/* global window, document, io */
+
+let socket = io.connect('http://localhost:8080');
 
 var p1_direction = 0;
 var p1_direction_speed = 0;
+
+let hasBall = false;
 
 window.addEventListener('deviceorientation', function (orientation) {
   var alpha = orientation.alpha;
@@ -58,18 +63,18 @@ var p1 = {
     color: "#A7EBCA"
 };
 
-var p2 = {
-    x: game.width - 10 - paddle.width,
-    y: game.height / 2 - paddle.height / 2,
-    color: "#A7EBCA"
-};
+socket.on('ball', (_b) => {
+  console.log('back ball', _b);
+  ball = _b;
+  hasBall = true;
+});
 
 
 // reset ball
 const new_ball = () => {
 
     // position
-    ball.x = game.width / 2;
+    ball.x = game.width - 100;
     ball.y = game.height / 2;
 
     // speed
@@ -79,72 +84,67 @@ const new_ball = () => {
 };
 
 new_ball();
+socket.on('player1', () => {
+  new_ball();
+  hasBall = true;
+});
 
 // draw everything
 function draw(time) {
     // getGamepadInput();
     clear(game.ctx, game.width, game.height);
 
-    ball.x += ball.speedX * time;
-    ball.y += ball.speedY * time;
-
     p1.y += p1_direction * paddle.speed * time * p1_direction_speed;
-
-    if (ball.y + ball.radius >= p1.y &&
-        ball.y - ball.radius <= p1.y + paddle.height &&
-        ball.x - ball.radius <= p1.x + paddle.width)
-    {
-      ball.speedX = -ball.speedX;
-      ball.speedX *= 1.1;
-    }
-
-    if (ball.y + ball.radius >= p2.y &&
-        ball.y - ball.radius <= p2.y + paddle.height &&
-        ball.x + ball.radius >= p2.x)
-    {
-      ball.speedX = -ball.speedX;
-      ball.speedX *= 1.1;
-    }
-
-    if(p1.y <= 0) {
-      p1.y = 0;
-    }
-
-    if(p1.y + paddle.height >= canvasElement.height) {
-      p1.y = canvasElement.height - paddle.height;
-    }
-
-    if(p2.y <= 0) {
-      p2.y = 0;
-    }
-
-    if(p2.y + paddle.height >= canvasElement.height) {
-      p2.y = canvasElement.height - paddle.height;
-    }
-
-    if(ball.y - ball.radius <= 0) {
-      ball.speedY = -ball.speedY;
-    }
-
-    if(ball.y + ball.radius >= canvasElement.height) {
-      ball.speedY = -ball.speedY;
-    }
-
-    if(ball.x - ball.radius <= 0) {
-      new_ball();
-    }
-
-    if(ball.x + ball.radius >= canvasElement.width) {
-      new_ball();
-    }
-
-    // p1.y = ball.y - paddle.height / 2;
-    p2.y = ball.y - paddle.height / 2;
-
-    drawCircle(game.ctx, ball.x, ball.y, ball.radius);
-
     drawRectangle(game.ctx, p1.x, p1.y, paddle.width, paddle.height, p1.color);
-    drawRectangle(game.ctx, p2.x, p2.y, paddle.width, paddle.height, p2.color);
+
+
+    if(hasBall) {
+
+      ball.x += ball.speedX * time;
+      ball.y += ball.speedY * time;
+
+
+
+      if (ball.y + ball.radius >= p1.y &&
+          ball.y - ball.radius <= p1.y + paddle.height &&
+          ball.x - ball.radius <= p1.x + paddle.width)
+      {
+        ball.speedX = -ball.speedX;
+        ball.speedX *= 1.1;
+      }
+
+      if(p1.y <= 0) {
+        p1.y = 0;
+      }
+
+      if(p1.y + paddle.height >= canvasElement.height) {
+        p1.y = canvasElement.height - paddle.height;
+      }
+
+      if(ball.y - ball.radius <= 0) {
+        ball.speedY = -ball.speedY;
+      }
+
+      if(ball.y + ball.radius >= canvasElement.height) {
+        ball.speedY = -ball.speedY;
+      }
+
+      if(ball.x - ball.radius <= 0) {
+        new_ball();
+      }
+
+      if(ball.x + ball.radius >= canvasElement.width) {
+        // new_ball();
+        hasBall = false;
+        socket.emit('ball', ball);
+        console.log('emit', ball);
+      }
+
+
+      drawCircle(game.ctx, ball.x, ball.y, ball.radius);
+
+    }
+
 }
 
 let lastFrameTime = Date.now();
@@ -156,6 +156,11 @@ const onAnimationFrame = () => {
 };
 
 onAnimationFrame();
+
+// socket.on('news', function (data) {
+//   console.log(data);
+//   socket.emit('my other event', { my: 'data' });
+// });
 
 
 // ------------------------------
