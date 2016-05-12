@@ -10,9 +10,9 @@ window.addEventListener('deviceorientation', function (orientation) {
   beta = Math.round(beta);
   document.getElementById('beta_output').innerText= beta;
 
-  if(beta > 20) {
+  if(beta > 10) {
     p1_direction = 1;
-  } else if (beta < 20) {
+  } else if (beta < -10) {
     p1_direction = -1;
   } else {
     p1_direction = 0;
