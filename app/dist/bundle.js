@@ -8,9 +8,8 @@ window.addEventListener('deviceorientation', function (orientation) {
   var beta = orientation.beta;
   var gamma = orientation.gamma;
 
-  alpha = Math.round(alpha);
   beta = Math.round(beta);
-  gamma = Math.round(gamma);
+  document.getElementById('beta_output').innerText = beta;
 
   if (beta > 20) {
     p1_direction = 1;
