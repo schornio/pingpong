@@ -9,7 +9,6 @@ window.addEventListener('deviceorientation', function (orientation) {
   var gamma = orientation.gamma;
 
   beta = Math.round(beta);
-  document.getElementById('beta_output').innerText= beta;
 
   p1_direction_speed = Math.abs(beta) / 25;
   if(beta > 5) {
