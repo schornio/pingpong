@@ -1,6 +1,7 @@
 'use strict';
 
 var p1_direction = 0;
+var p1_direction_speed = 0;
 
 window.addEventListener('deviceorientation', function (orientation) {
   var alpha = orientation.alpha;
@@ -10,12 +11,14 @@ window.addEventListener('deviceorientation', function (orientation) {
   beta = Math.round(beta);
   document.getElementById('beta_output').innerText= beta;
 
-  if(beta > 10) {
+  p1_direction_speed = Math.abs(beta) / 25;
+  if(beta > 5) {
     p1_direction = 1;
-  } else if (beta < -10) {
+  } else if (beta < -5) {
     p1_direction = -1;
   } else {
     p1_direction = 0;
+    p1_direction_speed = 0;
   }
 }, true);
 
@@ -86,7 +89,7 @@ function draw(time) {
     ball.x += ball.speedX * time;
     ball.y += ball.speedY * time;
 
-    p1.y += p1_direction * paddle.speed;
+    p1.y += p1_direction * paddle.speed * time * p1_direction_speed;
 
     if (ball.y + ball.radius >= p1.y &&
         ball.y - ball.radius <= p1.y + paddle.height &&
